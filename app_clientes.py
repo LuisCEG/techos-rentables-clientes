@@ -14,6 +14,20 @@ st.set_page_config(
     layout="centered"
 )
 
+# --- OCULTAR MARCAS DE STREAMLIT (MODO CORPORATIVO) ---
+ocultar_menu_estilo = """
+            <style>
+            #MainMenu {visibility: hidden;} /* Oculta el menú superior derecho */
+            footer {visibility: hidden;}    /* Oculta la marca de agua inferior */
+            header {visibility: hidden;}    /* Oculta la franja superior por defecto */
+            
+            /* Oculta el botón flotante de 'Deploy' si llegara a aparecer */
+            .stDeployButton {display:none;}
+            </style>
+            """
+st.markdown(ocultar_menu_estilo, unsafe_allow_html=True)
+
+
 ARCHIVO_BD = "base_datos.xlsx"
 
 # --- MOTOR DE CÁLCULO PONDERADO (PMO) ---
@@ -53,7 +67,7 @@ with st.sidebar:
     admin_user = st.text_input("Usuario")
     admin_pass = st.text_input("Contraseña", type="password")
     
-    # AQUÍ LLAMAMOS A LA CONTRASEÑA SECRETA DE ADMINISTRADOR
+    # Validación con la bóveda de secretos
     if admin_user == "admin" and admin_pass == st.secrets["ADMIN_PASS"]:
         st.success("✅ Acceso concedido")
         st.divider()
@@ -135,7 +149,7 @@ else:
                 if boton_enviar and asunto and mensaje:
                     correo_remitente = "atencionalcliente@techosrentables.com" 
                     
-                    # AQUÍ LLAMAMOS A LA CONTRASEÑA SECRETA DEL CORREO
+                    # Llamada segura a la contraseña del correo
                     password_remitente = st.secrets["EMAIL_PASS"] 
                     
                     correo_destino = "atencionalcliente@techosrentables.com"
