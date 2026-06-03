@@ -14,36 +14,24 @@ st.set_page_config(
     layout="centered"
 )
 
-# Archivo interno estándar donde guardaremos la info de Geest
 ARCHIVO_BD = "base_datos.xlsx"
 
 # --- MOTOR DE CÁLCULO PONDERADO (PMO) ---
 def calcular_avance_ponderado(valor, peso, es_porcentaje):
-    # Si la celda está vacía, el avance de esa fase es 0
     if valor == "vacio" or pd.isna(valor) or str(valor).strip() == "":
         return 0.0
-    
-    # Si la fase NO se mide en %, sino por tener un dato (ej. Firma Contrato)
     if not es_porcentaje:
         return float(peso)
-        
-    # Si la fase SÍ se mide en %, extraemos los números
     val_str = str(valor)
     porcentajes = [int(x) for x in re.findall(r'(\d+)%', val_str)]
     if porcentajes:
-        # Calculamos el promedio de lo que dice la celda y le aplicamos el peso
         promedio = sum(porcentajes) / len(porcentajes)
         return (promedio / 100.0) * peso
-        
-    # Si no tiene "%" pero dice "Sí", "Pagado", "Finalizado", asume el peso total
     val_lower = val_str.lower()
     if any(palabra in val_lower for palabra in ["si", "sí", "liquidado", "pagado", "entregado", "finalizado", "aprobado", "ok"]):
         return float(peso)
-        
-    # Si tiene texto pero no se ajusta a lo anterior, asumimos que está en proceso (mitad del peso)
     return float(peso) / 2.0
 
-# Cargar base de datos (con caché para velocidad)
 @st.cache_data
 def cargar_datos():
     if os.path.exists(ARCHIVO_BD):
@@ -65,7 +53,8 @@ with st.sidebar:
     admin_user = st.text_input("Usuario")
     admin_pass = st.text_input("Contraseña", type="password")
     
-    if admin_user == "admin" and admin_pass == "Techos2026*":
+    # AQUÍ LLAMAMOS A LA CONTRASEÑA SECRETA DE ADMINISTRADOR
+    if admin_user == "admin" and admin_pass == st.secrets["ADMIN_PASS"]:
         st.success("✅ Acceso concedido")
         st.divider()
         st.write("**Actualizar Base de Datos (Geest)**")
@@ -101,8 +90,6 @@ else:
             st.subheader(f"👤 Cliente: {datos['Nombre Cliente']}")
             st.divider()
             
-            # --- MAPEO PONDERADO SEGÚN MATRIZ DE ETAPAS ---
-            # Las columnas de tu Excel y el "peso" exacto que tú definiste
             etapas_mapeo = [
                 {"nombre": "Firma de Contrato y Anticipo", "col": "Fecha Contrato (RV)", "peso": 1, "es_porcentaje": False},
                 {"nombre": "Cronograma de Instalación", "col": "Cronograma Instalación", "peso": 2, "es_porcentaje": False},
@@ -123,18 +110,14 @@ else:
             puntaje_total = 0.0
             etapa_actual = "Inicio de Proyecto"
             
-            # Recorremos cada etapa sumando los puntos
             for etapa in etapas_mapeo:
                 avance_fase = calcular_avance_ponderado(datos.get(etapa["col"], "vacio"), etapa["peso"], etapa["es_porcentaje"])
                 puntaje_total += avance_fase
-                # Si la fase tiene avance, la marcamos como la fase actual
                 if avance_fase > 0:
                     etapa_actual = etapa["nombre"]
             
-            # Aseguramos que el total no pase del 100% y lo volvemos número entero
             porcentaje_global = min(int(puntaje_total), 100)
             
-            # --- MOSTRAR RESULTADOS AL CLIENTE ---
             st.write("### 📊 Estado General del Proyecto")
             st.progress(porcentaje_global / 100.0)
             st.info(f"**Progreso Total:** {porcentaje_global}% completado\n\n**Etapa Actual:** {etapa_actual}")
@@ -151,7 +134,10 @@ else:
                 
                 if boton_enviar and asunto and mensaje:
                     correo_remitente = "atencionalcliente@techosrentables.com" 
-                    password_remitente = "+*hN+Y_s@kE=]" 
+                    
+                    # AQUÍ LLAMAMOS A LA CONTRASEÑA SECRETA DEL CORREO
+                    password_remitente = st.secrets["EMAIL_PASS"] 
+                    
                     correo_destino = "atencionalcliente@techosrentables.com"
                     
                     msg = MIMEMultipart()
