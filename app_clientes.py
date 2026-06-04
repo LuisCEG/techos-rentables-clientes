@@ -17,22 +17,13 @@ st.set_page_config(
 # --- OCULTAR ABSOLUTAMENTE TODAS LAS MARCAS DE STREAMLIT ---
 ocultar_elementos = """
             <style>
-            /* 1. Ocultar el Header superior y la línea de colores */
             [data-testid="stHeader"] {display: none !important;}
             [data-testid="stDecoration"] {display: none !important;}
-            
-            /* 2. Ocultar el menú de los tres puntos (Toolbar) */
             [data-testid="stToolbar"] {display: none !important;}
-            
-            /* 3. Ocultar el Footer y el botón de "Made with Streamlit" abajo a la derecha */
             [data-testid="stFooter"] {display: none !important;}
             [data-testid="stViewerBadge"] {display: none !important;}
             footer {display: none !important;}
-            
-            /* 4. Ocultar el botón flotante de Manage App */
             [data-testid="manage-app-button"] {display: none !important;}
-            
-            /* 5. Respaldos tradicionales */
             #MainMenu {visibility: hidden !important;}
             .stDeployButton {display: none !important;}
             </style>
@@ -50,18 +41,11 @@ def calcular_avance_ponderado(valor, peso, es_porcentaje):
         return float(peso)
         
     val_str = str(valor)
-    # Extraemos todos los números que tengan un "%" al lado
     porcentajes = [int(x) for x in re.findall(r'(\d+)%', val_str)]
     
     if porcentajes:
-        # ¡LA CORRECCIÓN ESTÁ AQUÍ! 
-        # Sumamos las subtareas linealmente en lugar de promediarlas
         suma_subtareas = sum(porcentajes)
-        
-        # Le ponemos un techo del 100% por seguridad operativa
         suma_subtareas = min(suma_subtareas, 100) 
-        
-        # Aplicamos el peso que definió la PMO
         return (suma_subtareas / 100.0) * float(peso)
         
     val_lower = val_str.lower()
@@ -69,6 +53,21 @@ def calcular_avance_ponderado(valor, peso, es_porcentaje):
         return float(peso)
         
     return float(peso) / 2.0
+
+# --- LECTURA DE BASE DE DATOS ---
+@st.cache_data
+def cargar_datos():
+    if os.path.exists(ARCHIVO_BD):
+        df = pd.read_excel(ARCHIVO_BD)
+    elif os.path.exists("Proceso Comercial _ Operativo [2026-Jun-01 10.21].xlsx"):
+        df = pd.read_excel("Proceso Comercial _ Operativo [2026-Jun-01 10.21].xlsx")
+    else:
+        return None
+        
+    df['Folio'] = df['Folio'].astype(str).str.strip()
+    df = df.fillna("vacio")
+    return df
+
 # --- BARRA LATERAL OCULTA: MÓDULO PMO / ADMINISTRADOR ---
 with st.sidebar:
     st.write("### 🔒 Acceso Centro de Gestión")
@@ -77,7 +76,6 @@ with st.sidebar:
     admin_user = st.text_input("Usuario")
     admin_pass = st.text_input("Contraseña", type="password")
     
-    # Validación con la bóveda de secretos
     if admin_user == "admin" and admin_pass == st.secrets["ADMIN_PASS"]:
         st.success("✅ Acceso concedido")
         st.divider()
@@ -158,10 +156,7 @@ else:
                 
                 if boton_enviar and asunto and mensaje:
                     correo_remitente = "atencionalcliente@techosrentables.com" 
-                    
-                    # Llamada segura a la contraseña del correo
                     password_remitente = st.secrets["EMAIL_PASS"] 
-                    
                     correo_destino = "atencionalcliente@techosrentables.com"
                     
                     msg = MIMEMultipart()
