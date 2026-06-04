@@ -14,19 +14,30 @@ st.set_page_config(
     layout="centered"
 )
 
-# --- OCULTAR MARCAS DE STREAMLIT (MODO CORPORATIVO) ---
-ocultar_menu_estilo = """
+# --- OCULTAR ABSOLUTAMENTE TODAS LAS MARCAS DE STREAMLIT ---
+ocultar_elementos = """
             <style>
-            #MainMenu {visibility: hidden;} /* Oculta el menú superior derecho */
-            footer {visibility: hidden;}    /* Oculta la marca de agua inferior */
-            header {visibility: hidden;}    /* Oculta la franja superior por defecto */
+            /* 1. Ocultar el Header superior y la línea de colores */
+            [data-testid="stHeader"] {display: none !important;}
+            [data-testid="stDecoration"] {display: none !important;}
             
-            /* Oculta el botón flotante de 'Deploy' si llegara a aparecer */
-            .stDeployButton {display:none;}
+            /* 2. Ocultar el menú de los tres puntos (Toolbar) */
+            [data-testid="stToolbar"] {display: none !important;}
+            
+            /* 3. Ocultar el Footer y el botón de "Made with Streamlit" abajo a la derecha */
+            [data-testid="stFooter"] {display: none !important;}
+            [data-testid="stViewerBadge"] {display: none !important;}
+            footer {display: none !important;}
+            
+            /* 4. Ocultar el botón flotante de Manage App */
+            [data-testid="manage-app-button"] {display: none !important;}
+            
+            /* 5. Respaldos tradicionales */
+            #MainMenu {visibility: hidden !important;}
+            .stDeployButton {display: none !important;}
             </style>
             """
-st.markdown(ocultar_menu_estilo, unsafe_allow_html=True)
-
+st.markdown(ocultar_elementos, unsafe_allow_html=True)
 
 ARCHIVO_BD = "base_datos.xlsx"
 
