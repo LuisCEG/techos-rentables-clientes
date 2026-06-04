@@ -30,35 +30,34 @@ st.markdown(ocultar_menu_estilo, unsafe_allow_html=True)
 
 ARCHIVO_BD = "base_datos.xlsx"
 
-# --- MOTOR DE CÁLCULO PONDERADO (PMO) ---
+# --- MOTOR DE CÁLCULO PONDERADO (ACTUALIZADO PARA SUBTAREAS) ---
 def calcular_avance_ponderado(valor, peso, es_porcentaje):
     if valor == "vacio" or pd.isna(valor) or str(valor).strip() == "":
         return 0.0
+    
     if not es_porcentaje:
         return float(peso)
+        
     val_str = str(valor)
+    # Extraemos todos los números que tengan un "%" al lado
     porcentajes = [int(x) for x in re.findall(r'(\d+)%', val_str)]
+    
     if porcentajes:
-        promedio = sum(porcentajes) / len(porcentajes)
-        return (promedio / 100.0) * peso
+        # ¡LA CORRECCIÓN ESTÁ AQUÍ! 
+        # Sumamos las subtareas linealmente en lugar de promediarlas
+        suma_subtareas = sum(porcentajes)
+        
+        # Le ponemos un techo del 100% por seguridad operativa
+        suma_subtareas = min(suma_subtareas, 100) 
+        
+        # Aplicamos el peso que definió la PMO
+        return (suma_subtareas / 100.0) * float(peso)
+        
     val_lower = val_str.lower()
     if any(palabra in val_lower for palabra in ["si", "sí", "liquidado", "pagado", "entregado", "finalizado", "aprobado", "ok"]):
         return float(peso)
-    return float(peso) / 2.0
-
-@st.cache_data
-def cargar_datos():
-    if os.path.exists(ARCHIVO_BD):
-        df = pd.read_excel(ARCHIVO_BD)
-    elif os.path.exists("Proceso Comercial _ Operativo [2026-Jun-01 10.21].xlsx"):
-        df = pd.read_excel("Proceso Comercial _ Operativo [2026-Jun-01 10.21].xlsx")
-    else:
-        return None
         
-    df['Folio'] = df['Folio'].astype(str).str.strip()
-    df = df.fillna("vacio")
-    return df
-
+    return float(peso) / 2.0
 # --- BARRA LATERAL OCULTA: MÓDULO PMO / ADMINISTRADOR ---
 with st.sidebar:
     st.write("### 🔒 Acceso Centro de Gestión")
