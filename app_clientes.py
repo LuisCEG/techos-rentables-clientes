@@ -93,8 +93,17 @@ with st.sidebar:
         st.error("❌ Credenciales incorrectas")
 
 # --- INTERFAZ PRINCIPAL (CLIENTES) ---
-st.title("☀️ Control de Proyectos")
-st.write("Ingresa tu número de folio para conocer el estado de tu sistema solar.")
+
+# Inyección del logo corporativo
+if os.path.exists("EDITABLES-TRN.png"):
+    # Usamos columnas para centrar el logo elegantemente
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.image("EDITABLES-TRN.png", use_container_width=True)
+
+st.markdown("<h1 style='text-align: center;'>Control de Proyectos</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'>Ingresa tu número de folio para conocer el estado de tu sistema solar.</p>", unsafe_allow_html=True)
+st.divider()
 
 df = cargar_datos()
 
