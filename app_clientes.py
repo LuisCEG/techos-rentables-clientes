@@ -144,6 +144,38 @@ else:
             st.progress(porcentaje_global / 100.0)
             st.info(f"**Progreso Total:** {porcentaje_global}% completado\n\n**Etapa Actual:** {etapa_actual}")
             
+            # --- GALERÍA FOTOGRÁFICA DE LA ETAPA ACTUAL ---
+            st.divider()
+            
+            diccionario_fotos = {
+                "Instalación: Puesta de Materiales": "Registro Fotografico - Instalación Puesta de Materiales en Sitio",
+                "Instalación: Sistema de Captación": "Registro fotografico - Instalación Sistema de Captación",
+                "Instalación: Cableado DC": "Registro Fotografico instalación - Instalación cableado DC",
+                "Instalación: Micros e Inversores": "Registro fotografico - Instalación Micros / Inversores",
+                "Instalación: Cableado AC": "Registro Fotografico - Instalación AC"
+            }
+            
+            if etapa_actual in diccionario_fotos:
+                col_fotos_geest = diccionario_fotos[etapa_actual]
+                fotos_data = datos.get(col_fotos_geest, "vacio")
+                
+                if pd.notna(fotos_data) and fotos_data != "vacio" and str(fotos_data).strip() != "":
+                    st.write(f"### 📸 Evidencia en campo: {etapa_actual}")
+                    links_fotos = str(fotos_data).split() 
+                    cols_img = st.columns(3) 
+                    
+                    foto_idx = 0
+                    for link in links_fotos:
+                        if link.startswith("http"):
+                            with cols_img[foto_idx % 3]:
+                                st.image(link, use_container_width=True)
+                            foto_idx += 1
+                else:
+                    st.info(f"Las fotografías de la etapa actual ({etapa_actual}) se encuentran en proceso de carga.")
+            
+            elif etapa_actual not in ["Inicio de Proyecto", "Interconexión Operador de Red", "Certificación RETIE", "Cierre y Pruebas de Sistemas", "Adecuación de Equipo de Medida"]:
+                pass 
+                
             st.divider()
             
             # --- FORMULARIO DE PQR ---
