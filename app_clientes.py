@@ -163,13 +163,25 @@ with st.sidebar:
     if acceso_admin:
         st.divider()
 
-        # Mostrar archivo actualmente en uso
-        _, ruta_actual = cargar_datos()
-        if ruta_actual:
+        # Mostrar archivo actualmente en uso + visor PMO
+        df_admin, ruta_actual = cargar_datos()
+        if ruta_actual and os.path.exists(ruta_actual):
             st.info(f"📂 Archivo activo: `{os.path.basename(ruta_actual)}`")
+
+            with open(ruta_actual, "rb") as file:
+                st.download_button(
+                    label="📥 Descargar Excel Activo",
+                    data=file,
+                    file_name=f"COPIA_{os.path.basename(ruta_actual)}",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+
+            if st.checkbox("👀 Ver vista previa de los datos"):
+                st.dataframe(df_admin)
         else:
             st.warning("⚠️ No hay archivo de datos activo.")
 
+        st.divider()
         st.write("**Actualizar Base de Datos (Geest)**")
         st.caption("Sube el archivo Excel original exportado de Geest.")
 
