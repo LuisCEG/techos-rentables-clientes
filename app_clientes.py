@@ -357,7 +357,8 @@ with st.form(key="form_pqr", clear_on_submit=True):
         if not asunto or not mensaje:
             st.error("⚠️ Completa todos los campos.")
         else:
-            try:
+            with st.spinner("⏳ Enviando tu solicitud, por favor espera..."):
+              try:
                 correo_remitente = "atencionalcliente@techosrentables.com"
                 password_remitente = st.secrets["EMAIL_PASS"]
                 correo_destino = "atencionalcliente@techosrentables.com"
@@ -388,7 +389,7 @@ Se ha recibido una nueva solicitud de atención al cliente.
 
                 msg.attach(MIMEText(cuerpo_correo, 'plain'))
 
-                server = smtplib.SMTP_SSL('mail.techosrentables.com', 465)
+                server = smtplib.SMTP_SSL('mail.techosrentables.com', 465, timeout=30)
                 server.login(correo_remitente, password_remitente)
                 server.send_message(msg)
                 server.quit()
