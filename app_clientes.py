@@ -401,10 +401,13 @@ Se ha recibido una nueva solicitud de atención al cliente.
 
                     msg.attach(MIMEText(cuerpo_correo, 'plain'))
 
-                    server = smtplib.SMTP_SSL('mail.techosrentables.com', 465, timeout=30)
-                    server.login(correo_remitente, password_remitente)
-                    server.send_message(msg)
-                    server.quit()
+                    # Conexión por puerto 587 (Estándar TLS para la nube)
+                server = smtplib.SMTP('mail.techosrentables.com', 587)
+                server.ehlo()
+                server.starttls() # Activa el blindaje de seguridad
+                server.login(correo_remitente, password_remitente)
+                server.send_message(msg)
+                server.quit()
 
                     st.success("✅ Tu solicitud ha sido enviada con éxito. Nos comunicaremos contigo pronto.")
 
