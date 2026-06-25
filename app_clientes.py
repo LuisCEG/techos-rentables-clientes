@@ -369,24 +369,23 @@ with st.form(key="form_pqr", clear_on_submit=True):
         if not asunto or not mensaje:
             st.error("⚠️ Completa todos los campos.")
         else:
-            with st.spinner("⏳ Enviando tu solicitud, por favor espera..."):
-                try:
-                    correo_remitente = "atencionalcliente@techosrentables.com"
-                    password_remitente = st.secrets["EMAIL_PASS"]
-                    correo_destino = "atencionalcliente@techosrentables.com"
+            try:
+                correo_remitente = "atencionalcliente@techosrentables.com"
+                password_remitente = st.secrets["EMAIL_PASS"]
+                correo_destino = "atencionalcliente@techosrentables.com"
 
-                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
 
-                    msg = MIMEMultipart()
-                    msg['From']    = correo_remitente
-                    msg['To']      = correo_destino
-                    msg['Subject'] = (
-                        f"Nueva PQR ({tipo_solicitud}) | "
-                        f"Folio: {folio_input} | "
-                        f"{datos['Nombre Cliente']} | {timestamp}"
-                    )
+                msg = MIMEMultipart()
+                msg['From']    = correo_remitente
+                msg['To']      = correo_destino
+                msg['Subject'] = (
+                    f"Nueva PQR ({tipo_solicitud}) | "
+                    f"Folio: {folio_input} | "
+                    f"{datos['Nombre Cliente']} | {timestamp}"
+                )
 
-                    cuerpo_correo = f"""
+                cuerpo_correo = f"""
 Se ha recibido una nueva solicitud de atención al cliente.
 
 📅 Fecha y hora : {timestamp}
@@ -397,25 +396,25 @@ Se ha recibido una nueva solicitud de atención al cliente.
 
 📝 Mensaje:
 {mensaje}
-                    """.strip()
+                """.strip()
 
-                    msg.attach(MIMEText(cuerpo_correo, 'plain'))
+                msg.attach(MIMEText(cuerpo_correo, 'plain'))
 
-                    # Conexión por puerto 587 (Estándar TLS para la nube)
+                # --- CONEXIÓN PUERTO 587 (TLS) ---
                 server = smtplib.SMTP('mail.techosrentables.com', 587)
                 server.ehlo()
-                server.starttls() # Activa el blindaje de seguridad
+                server.starttls()
                 server.login(correo_remitente, password_remitente)
                 server.send_message(msg)
                 server.quit()
 
-                    st.success("✅ Tu solicitud ha sido enviada con éxito. Nos comunicaremos contigo pronto.")
+                st.success("✅ Tu solicitud ha sido enviada con éxito. Nos comunicaremos contigo pronto.")
 
-                except KeyError:
-                    st.error("⚠️ Configuración de correo no disponible. Contáctanos directamente.")
-                except smtplib.SMTPAuthenticationError:
-                    st.error("⚠️ Error de autenticación en el servidor de correo.")
-                except smtplib.SMTPException as e:
-                    st.error(f"⚠️ Error al enviar el correo. Detalle técnico: {e}")
-                except Exception as e:
-                    st.error(f"⚠️ Error inesperado: {e}")
+            except KeyError:
+                st.error("⚠️ Configuración de correo no disponible. Contáctanos directamente.")
+            except smtplib.SMTPAuthenticationError:
+                st.error("⚠️ Error de autenticación en el servidor de correo.")
+            except smtplib.SMTPException as e:
+                st.error(f"⚠️ Error al enviar el correo. Detalle técnico: {e}")
+            except Exception as e:
+                st.error(f"⚠️ Error inesperado: {e}")
